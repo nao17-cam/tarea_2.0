@@ -1,0 +1,225 @@
+---
+title: "Tarea 2"
+author: "Mitzi Naomi Camargo Arellano"
+date: "16/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tarea 2. Genómica funcional 2022
+
+1.  ***Considera las siguientes cantidades discute y justifica el tipo de distribución de probabilidad pueden tener las siguientes variables:***
+
+**a. El número (talla) de calzado de adultos varones en México.**
+
+Se trata de distribución unimodal. Debido a que existe un tamaño promedio de calzado, que va entre 7 y 8, es por ello que la distribución se acerca más a la media. Por lo que no es probable que sea de distribución de cola larga, ya que no hay pocas personas calzan tallas grandes, ni pocas personas que calzan tallas pequeñas.
+
+**b. La distribución de habitantes en asentamientos humanos de México.**
+
+Se trata de distribución de cola larga. Esto se debe a que hay ciudades y municipios con más habitantes que otros, por multiples factores como importancia turistica, educativa o economica.
+
+**c. La velocidad promedio de los automóviles en Bernardo Quintana a las 9 de la mañana en un día laborable.**
+
+Puede ser distribución gamma. Se trata de una hora con concentración de coches, por lo que la carretera está menos libre para transitar (tráfico). Por lo que la mayoría de los coches tienen una velocidad baja.
+
+**d. La velocidad promedio de los automóviles en Bernardo Quintana a las 3 de la mañana.**
+
+Es una distribución de cola larga. Ya que la carretera se encuentra más libre para viajar, existen quienes respeten la velocidad, pero también tiende a respetarse menos las reglas de transito.
+
+***2. Supongamos que tenemos dos nodos (A,B) en una red. El nodo A y B tiene el***
+
+***mismo degree, pero el A tiene un coeficiente de clusterización de 1 y el nodo B un***
+
+***coeficiente bajo. Dibuja está situación y explica cuál sería una mejor diana si quieres***
+
+***eliminarlos y afectar a la red.***
+
+NOTA: Las líneas salierón gruesas en el intento de que fueran líneas rectas. No tenía regla :(
+
+![](images/Dise%C3%B1o%20sin%20t%C3%ADtulo.png)
+
+3.  ***Elabora un programa en R que usando funciones calcule, a partir de una matriz de adyacencia (Sólo utiliza R base para resolver este problema)***
+
+    #Primero tomamos la matriz "Red de amiguis"
+
+    ```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = TRUE)
+
+    matriz_amiguis<-read.csv("red_amiguis.csv")
+    matriz_amiguis
+    ```
+
+    #Se realizan modificaciones:
+
+    ```{r}
+
+    class(matriz_amiguis) #Para quitar la columna númerica
+    matriz_amiguis[,1]<-row.names(matriz_amiguis) #Se seleccionan los nombres de la primer columna
+    matriz_amiguis #Imprimimos
+    matriz_amiguis1<-matriz_amiguis[,-1] #Se elimina la primer columna
+    matriz_amiguis1 #Imprimimos
+    matriz_amiguis2<-matriz_amiguis1[-2, ] #Se eliminan la columna con "NA"
+    matriz_amiguis2 #Imprimimos
+    matriz_final<-as.matrix(matriz_amiguis2) #Se convierte a dataframe
+    matriz_final #Imprimimos
+    class(matriz_final) #Paso final para trabajar con la matriz
+    ```
+
+    **a. Si la red es dirigida o no.**
+
+    ```{r}
+    # Podemos usar la función "isSymmetric.matrix" para observar la simetría de la matriz. Ya que entre las carísticas de las redes dirigidas son la simetría.
+
+    isSymmetric.matrix(matriz_final)
+    ```
+
+    **b. Si la red es pesada o no.**
+
+    ```{r}
+    #Se puede realizar con un ciclo
+    f<-c() #Creo un vector vacío
+    for(i in 1:ncol(matriz_final)){ 
+      for(j in 1:nrow(matriz)){
+        lista <- c(lista, print(paste(matriz[i,j]==1 | matriz[i,j]==0)))
+      }
+    }
+    #El 1 se puede colocar en i, para que calcule autómaticamente los nodos. 
+    #Me arroja si tiene un valor boleano. 
+    f # Imprimimos
+
+    #Se convierten los TRUE en valores númericos
+
+    g <-replace(f, f==TRUE, 1)
+    g
+
+    #De forma que se puede usar la función "var"
+
+    if(var(g)==0) {
+      print("RED NO PESADA")
+    } else {
+      print ("RED PESADA")
+    }
+    #Imprimirá que la red NO ES PESADA
+    ```
+
+    **c. El degree de los nodos.**
+
+    ```{r}
+    #Cuando se trata de una red dirigida, encontramos un degree de entrada y de salida. 
+
+    d_sal <- c()
+    for (i in 1:ncol(matriz_final)){ 
+      d_sal<-c(d_sal, sum(matriz_final[,i]))
+    } #Rellenar los valores para el degree de cada interacción. 
+    d_sal
+
+
+    d_ent <- c()
+    for (i in 1:nrow(matriz_final)){
+      d_ent<-c(d_ent, sum(matriz_final[i,]))
+    } #Rellenar los valores para el degree de cada interacción. 
+    d_ent
+
+    ```
+
+    **d. El histograma del degree.**
+
+    ```{r}
+    hist(d_sal) 
+    hist(d_ent)
+
+    #Se gráfican las distribuciones 
+    ```
+
+4.  ***A partir de la red de interacción de proteínas alojada en la librería igraphdata,***
+
+    ***que puedes llamar mediante data(yeast) elabora un programa en R (acá sí puedes***
+
+    ***usar librerías especializadas de R) que 1:***
+
+    ```{r}
+    #Cargar las librerias correspondientes 
+    library(igraph)
+    library(igraphdata) 
+    ```
+
+    1.  **a. Calcule la distribución de conectividades y grafique esa distribución . Discute**
+
+        **tu resultado.**
+
+    ```{r}
+
+    #Tomamos "yeast" de igraphdata
+    data("yeast") 
+    #Con "degree.distribution" obtengo la distribución del degree
+    degree.distribution(yeast) -> distribucion 
+    plot(distribucion) #gráfica
+
+    ```
+
+    **b. Grafique el boxplot de la distribución de conectividades y discute tu resultado.**
+
+    ```{r}
+    #Uso la función boxplot
+    boxplot(distribucion)
+    ```
+
+    **c. Encuentre la proporción de nodos que tienen 15 o más conectividades.**
+
+    ```{r}
+    #Calcula los degree de toda la red
+    h <-degree(yeast) 
+    #Para obtener nodos mayores a 15, se selecciona con "subset"
+    n15 <-subset(h,h>15) 
+    length(n15)
+    ## Reasultan 406 nodos con más de 15
+    length(h) 
+    ## El resultado de todos los nodos de la red son 2617
+    #Para generar la proporción con más de 15 conexiones
+    length(n15) / length(h)
+    ```
+
+    **d. Calcule el degree máximo de la red.**
+
+    ```{r}
+    max(h)
+    ```
+
+    **e. Calcule el diámetro**
+
+    ```{r}
+    diameter(yeast)
+    ```
+
+    **f. La trayectoria más larga.**
+
+    ```{r}
+    farthest.nodes(yeast)
+    ```
+
+    **g. Elimine los 10 nodos más conectados de la red y determine el diámetro cada**
+
+    **vez que lo haga.**
+
+    ```{r}
+    #"sort" para ordenar de mayor a menor, se toman los que más tienen
+    diameter(yeast)
+    nodos_mas<-sort(h, decreasing = TRUE)[1:10] 
+    nodos_mas
+
+    #Se asigna el vector de nombres, para visualizar los nodos a eliminar.
+    nodos_mas<-names(masconectados) 
+    #Se eliminan de la red original con "delete_vertices
+    y<-delete_vertices(yeast, nodos_mas) 
+    y
+    diameter(y) 
+    ```
+
+    **j. Determine si la red es de mundo pequeño, ultra pequeño u otra.**
+
+    ```{r}
+    plot(degree_distribution(yeast))
+    ```
